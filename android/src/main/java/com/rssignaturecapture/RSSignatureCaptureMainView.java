@@ -137,12 +137,12 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
   /**
    * save the signature to an sd card directory
    */
-  final void saveImage() {
+ final void saveImage() {
 
-    String root = Environment.getExternalStorageDirectory().toString();
+    File root = getContext().getFilesDir();
 
     // the directory where the signature will be saved
-    File myDir = new File(root + "/saved_signature");
+    File myDir = new File(root, "saved_signature");
 
     // make the directory if it does not exist yet
     if (!myDir.exists()) {
@@ -160,15 +160,12 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
 
     try {
 
-      Log.d("React Signature", "Save file-======:" + saveFileInExtStorage);
+      Log.d("React Signature", "Save file-======:");
       // save the signature
-      if (saveFileInExtStorage) {
-        FileOutputStream out = new FileOutputStream(file);
-        this.signatureView.getSignature().compress(Bitmap.CompressFormat.PNG, 90, out);
-        out.flush();
-        out.close();
-      }
-
+      FileOutputStream out = new FileOutputStream(file);
+      this.signatureView.getSignature().compress(Bitmap.CompressFormat.PNG, 90, out);
+      out.flush();
+      out.close();
 
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
       Bitmap resizedBitmap = getResizedBitmap(this.signatureView.getSignature());
@@ -179,7 +176,7 @@ public class RSSignatureCaptureMainView extends LinearLayout implements OnClickL
       String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
       WritableMap event = Arguments.createMap();
-      event.putString("pathName", file.getAbsolutePath());
+      event.putString("pathName", "file://" + file.getAbsolutePath());
       event.putString("encoded", encoded);
       ReactContext reactContext = (ReactContext) getContext();
       reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(getId(), "topChange", event);
